@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import os
+import numpy as np
 
 # Get the directory where the script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -19,15 +20,23 @@ def extract_columns(data):
         'forceSmall': forceSmall
     }
 
-def create_plot(distance, force):
-    plt.scatter(distance, force)
+def create_graph(distance, force):
+    coefficients = np.polyfit(distance, force, 1)
+    poly = np.poly1d(coefficients)
+    slope = np.around(coefficients[0], 3)
+
+    plt.plot(distance, poly(distance), color="blue", label=f"Hooke's Law Constant = {slope} N/m" )
+    plt.scatter(distance, force, color="red", marker="*", label='Data')
+
     plt.title("Hooke's Law: Force (N) vs Displacement (m)")
     plt.xlabel("Displacement (m)")
     plt.ylabel("Force (N)")
+    plt.legend()
     plt.show()
 
 data_columns = extract_columns(data)
-create_plot(data_columns['distance'], data_columns['forceBig'])
+create_graph(data_columns['distance'], data_columns['forceBig'])
 # print(data_columns['distance'])
 # print(data_columns['forceBig'])
 # print(data_columns['forceSmall'])
+
