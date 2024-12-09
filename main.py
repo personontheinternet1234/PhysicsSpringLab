@@ -13,58 +13,42 @@ class Model(nn.Module):
         return self.linear(x)
 
 
-if __name__ == "__main__":
-    model_small = Model()
-
+def train(model, x, y, epochs=1000):
+    print("\n")
     criterion = nn.MSELoss()
-    optimizer = optim.SGD(model_small.parameters(), lr=0.001)
+    optimizer = optim.SGD(model.parameters(), lr=0.001)
+
+    epochs = epochs
+    loss = 0
+    for epoch in range(epochs):
+        model.train()
+
+        predictions = model(x)
+        loss = criterion(predictions, y)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    final_weight = model.linear.weight.item()
+
+    print(f"Loss: {loss.item()}")
+    print(f"Final weight: {final_weight:.4f}")
+
+
+if __name__ == "__main__":
+    model_small_spring = Model()
 
     data = pd.read_csv('data.csv')
 
     x_data = torch.tensor(data['Distance (cm)'].values, dtype=torch.float32).view(-1, 1)
     y_data = torch.tensor(data['Force (Small) (N)'].values, dtype=torch.float32).view(-1, 1)
 
-    epochs = 1000
-    loss = 0
-    for epoch in range(epochs):
-        model_small.train()
-
-        predictions = model_small(x_data)
-        loss = criterion(predictions, y_data)
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-    final_weight = model_small.linear.weight.item()
-
-    print(f"{loss.item()}")
-    print(f"Final weight: {final_weight:.4f}")
-
-    print("##########################################################")
-
-    model_big = Model()
-
-    criterion = nn.MSELoss()
-    optimizer = optim.SGD(model_big.parameters(), lr=0.001)
-
-    data = pd.read_csv('data.csv')
+    train(model_small_spring, x_data, y_data)
 
     x_data = torch.tensor(data['Distance (cm)'].values, dtype=torch.float32).view(-1, 1)
     y_data = torch.tensor(data['Force (Big) (N)'].values, dtype=torch.float32).view(-1, 1)
 
-    epochs = 1000
-    for epoch in range(epochs):
-        model_big.train()
+    model_spring_big = Model()
 
-        predictions = model_big(x_data)
-        loss = criterion(predictions, y_data)
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-    final_weight = model_big.linear.weight.item()
-
-    print(f"{loss.item()}")
-    print(f"Final weight: {final_weight:.4f}")
+    train(model_spring_big, x_data, y_data)
