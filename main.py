@@ -16,7 +16,7 @@ class Model(nn.Module):
 if __name__ == "__main__":
     model_small = Model()
 
-    criterion = nn.MSELoss()  # Mean Squared Error Loss
+    criterion = nn.MSELoss()
     optimizer = optim.SGD(model_small.parameters(), lr=0.001)
 
     data = pd.read_csv('data.csv')
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     model_big = Model()
 
-    criterion = nn.MSELoss()  # Mean Squared Error Loss
+    criterion = nn.MSELoss()
     optimizer = optim.SGD(model_big.parameters(), lr=0.001)
 
     data = pd.read_csv('data.csv')
