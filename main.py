@@ -1,43 +1,70 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import pandas as pd
 
 
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
-        self.linear = nn.Linear(1, 1)
+        self.linear = nn.Linear(1, 1, bias=False)
 
     def forward(self, x):
         return self.linear(x)
 
 
 if __name__ == "__main__":
-    model = Model()
+    model_small = Model()
 
     criterion = nn.MSELoss()  # Mean Squared Error Loss
-    optimizer = optim.SGD(model.parameters(), lr=0.01)
+    optimizer = optim.SGD(model_small.parameters(), lr=0.001)
 
-    x_train = torch.tensor([[1.0], [2.0], [3.0], [4.0]], requires_grad=False)
-    y_train = torch.tensor([[2.0], [4.0], [6.0], [8.0]], requires_grad=False)
+    data = pd.read_csv('data.csv')
 
-    epochs = 100
+    x_data = torch.tensor(data['Distance (cm)'].values, dtype=torch.float32).view(-1, 1)
+    y_data = torch.tensor(data['Force (Small) (N)'].values, dtype=torch.float32).view(-1, 1)
+
+    epochs = 1000
+    loss = 0
     for epoch in range(epochs):
-        model.train()
+        model_small.train()
 
-        predictions = model(x_train)
-        loss = criterion(predictions, y_train)
+        predictions = model_small(x_data)
+        loss = criterion(predictions, y_data)
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        if (epoch + 1) % 10 == 0:
-            print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.item()}")
+    final_weight = model_small.linear.weight.item()
 
-    final_weight = model.linear.weight.item()
-    final_bias = model.linear.bias.item()
-
-    print("\nTraining completed.")
+    print(f"{loss.item()}")
     print(f"Final weight: {final_weight:.4f}")
-    print(f"Final bias: {final_bias:.4f}")
+
+    print("##########################################################")
+
+    model_big = Model()
+
+    criterion = nn.MSELoss()  # Mean Squared Error Loss
+    optimizer = optim.SGD(model_big.parameters(), lr=0.001)
+
+    data = pd.read_csv('data.csv')
+
+    x_data = torch.tensor(data['Distance (cm)'].values, dtype=torch.float32).view(-1, 1)
+    y_data = torch.tensor(data['Force (Big) (N)'].values, dtype=torch.float32).view(-1, 1)
+
+    epochs = 1000
+    for epoch in range(epochs):
+        model_big.train()
+
+        predictions = model_big(x_data)
+        loss = criterion(predictions, y_data)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    final_weight = model_big.linear.weight.item()
+
+    print(f"{loss.item()}")
+    print(f"Final weight: {final_weight:.4f}")
